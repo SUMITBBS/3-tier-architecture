@@ -2,6 +2,8 @@ pipeline {
     agent any
 
     environment {
+        TF_PLUGIN_CACHE_DIR = '/var/lib/jenkins/.terraform.d/plugin-cache'
+
         AWS_ACCESS_KEY_ID     = credentials('AWS_ACCESS_KEY_ID')
         AWS_SECRET_ACCESS_KEY = credentials('AWS_SECRET_ACCESS_KEY')
         AWS_DEFAULT_REGION    = 'us-west-2'
@@ -16,7 +18,10 @@ pipeline {
 
         stage('Terraform Init') {
             steps {
-                sh 'terraform init -no-color'
+                sh '''
+                    rm -rf .terraform
+                    terraform init -no-color
+                   '''
             }
         }
 
@@ -52,5 +57,16 @@ pipeline {
     		
 	   }
 	}	
+    }
+    
+    post {
+
+        success {
+            echo 'Pipeline completed successfully!'
+        }
+
+        failure {
+            echo 'Pipeline failed. Please check console output.'
+        }
     }
 }
